@@ -1,0 +1,37 @@
+# Target directories
+target/
+work/
+temp/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# IDE settings
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
+.factorypath
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker directories
+pgdata/
+redisdata/
+rabbitdata/
+
+# Temporary directories
+tmp/
+temp-deployments/
