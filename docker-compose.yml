@@ -1,0 +1,102 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    container_name: pipelineforge-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pipelineforge}
+      POSTGRES_USER: ${POSTGRES_USER:-pipelineforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pipelineforge}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pipelineforge}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7.2
+    container_name: pipelineforge-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: pipelineforge-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USERNAME:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  runner:
+    image: node:20-slim
+    container_name: pipelineforge-runner
+    volumes:
+      - deployments:/shared/deployments
+    ports:
+      - "3000:3000"
+    command: >
+      sh -c "apt-get update && apt-get install -y --no-install-recommends curl procps && rm -rf /var/lib/apt/lists/* && tail -f /dev/null"
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: pipelineforge-app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-pipelineforge}
+      DB_USERNAME: ${POSTGRES_USER:-pipelineforge}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-pipelineforge}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_USERNAME: ${RABBIT_USERNAME:-guest}
+      RABBIT_PASSWORD: ${RABBIT_PASSWORD:-guest}
+      JAVA_OPTS: ${JAVA_OPTS:--XX:+UseContainerSupport}
+      JWT_SECRET: ${JWT_SECRET:-change-me-change-me-change-me-change-me}
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:-change-me-change-me-change-me-change-me}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET:-}
+      RUNNER_CONTAINER: ${RUNNER_CONTAINER:-pipelineforge-runner}
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - deployments:/shared/deployments
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:
+  redisdata:
+  rabbitdata:
+  deployments:

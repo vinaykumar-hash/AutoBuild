@@ -1,0 +1,44 @@
+name: Deployment Simulation
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "dev"
+
+jobs:
+  deploy-sim:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      SPRING_PROFILES_ACTIVE: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+          cache: "maven"
+      - name: Build
+        run: mvn -q -DskipTests package
+      - name: Start stack
+        run: docker compose up -d --build
+      - name: Wait for health
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8080/actuator/health > /dev/null; then
+              echo "Application healthy";
+              exit 0;
+            fi
+            sleep 5;
+          done
+          echo "Application failed to become healthy";
+          docker compose ps;
+          exit 1
+      - name: Shutdown
+        if: always()
+        run: docker compose down -v

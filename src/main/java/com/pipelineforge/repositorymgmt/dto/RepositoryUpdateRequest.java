@@ -1,0 +1,17 @@
+package com.pipelineforge.repositorymgmt.dto;
+
+import com.pipelineforge.repositorymgmt.validation.RepositoryValidation;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+public record RepositoryUpdateRequest(
+		@Size(max = 140, message = "repoName must be 140 characters or fewer")
+		String repoName,
+		@Pattern(regexp = RepositoryValidation.GITHUB_URL_REGEX, message = "githubUrl must be a valid GitHub repository URL")
+		String githubUrl,
+		@Size(max = 120, message = "branch must be 120 characters or fewer")
+		String branch,
+		@Size(max = 2000, message = "accessToken must be 2000 characters or fewer")
+		String accessToken
+) {
+}

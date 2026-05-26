@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AutoBuild | Developer Dashboard</title>
+	<!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+	<!-- FontAwesome Icons -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+	<!-- Loading Screen Overlay -->
+	<div id="loading-overlay" class="loading-overlay hidden">
+		<div class="loader"></div>
+	</div>
+
+	<!-- App Wrapper -->
+	<div id="app-container" class="app-container">
+		
+		<!-- Sidebar Navigation (Hidden in Auth View) -->
+		<aside id="sidebar" class="sidebar hidden">
+			<div class="sidebar-header">
+				<div class="logo">
+					<i class="fa-solid fa-square-terminal logo-icon"></i>
+					<span>Auto<span>Build</span></span>
+				</div>
+			</div>
+			
+			<nav class="sidebar-menu">
+				<a href="#" class="menu-item active" data-view="dashboard">
+					<i class="fa-solid fa-chart-line"></i>
+					<span>Dashboard</span>
+				</a>
+				<a href="#" class="menu-item" data-view="repositories">
+					<i class="fa-solid fa-code-fork"></i>
+					<span>Repositories</span>
+				</a>
+				<a href="#" class="menu-item" data-view="pipelines">
+					<i class="fa-solid fa-diagram-project"></i>
+					<span>Pipelines</span>
+				</a>
+				<a href="#" class="menu-item" data-view="logs">
+					<i class="fa-solid fa-terminal"></i>
+					<span>Executions</span>
+				</a>
+			</nav>
+
+			<div class="sidebar-footer">
+				<div class="user-info">
+					<i class="fa-solid fa-user-gear"></i>
+					<span id="user-display-name">Developer</span>
+				</div>
+				<button id="logout-btn" class="logout-btn">
+					<i class="fa-solid fa-right-from-bracket"></i> Logout
+				</button>
+			</div>
+		</aside>
+
+		<!-- Main Workspace Area -->
+		<main id="main-content" class="main-content full-width">
+			
+			<!-- AUTHENTICATION VIEW -->
+			<section id="view-auth" class="view-panel">
+				<div class="auth-wrapper">
+					<div class="auth-branding">
+						<i class="fa-solid fa-square-terminal branding-icon animate-pulse"></i>
+						<h1>AutoBuild</h1>
+						<p>Automate your builds, tests, and deployments dynamically using repository configuration.</p>
+					</div>
+
+					<div class="auth-card glass-panel">
+						<!-- Login Form -->
+						<div id="auth-login-container">
+							<h2>Welcome Back</h2>
+							<p class="subtitle">Log in to manage your deployment workflows</p>
+							
+							<form id="login-form">
+								<div class="form-group">
+									<label for="login-email">Email Address</label>
+									<div class="input-icon-wrapper">
+										<i class="fa-solid fa-envelope"></i>
+										<input type="email" id="login-email" required placeholder="name@company.com">
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label for="login-password">Password</label>
+									<div class="input-icon-wrapper">
+										<i class="fa-solid fa-lock"></i>
+										<input type="password" id="login-password" required placeholder="••••••••">
+									</div>
+								</div>
+
+								<div id="login-error" class="form-error hidden"></div>
+								
+								<button type="submit" class="btn btn-primary btn-block">
+									Log In <i class="fa-solid fa-arrow-right-to-bracket"></i>
+								</button>
+							</form>
+							
+							<p class="auth-switch">
+								Don't have an account? <a href="#" id="to-register">Register here</a>
+							</p>
+						</div>
+
+						<!-- Registration Form -->
+						<div id="auth-register-container" class="hidden">
+							<h2>Create Account</h2>
+							<p class="subtitle">Join AutoBuild and start automating</p>
+							
+							<form id="register-form">
+								<div class="form-group">
+									<label for="register-name">Full Name</label>
+									<div class="input-icon-wrapper">
+										<i class="fa-solid fa-user"></i>
+										<input type="text" id="register-name" required placeholder="John Doe">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="register-email">Email Address</label>
+									<div class="input-icon-wrapper">
+										<i class="fa-solid fa-envelope"></i>
+										<input type="email" id="register-email" required placeholder="name@company.com">
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label for="register-password">Password</label>
+									<div class="input-icon-wrapper">
+										<i class="fa-solid fa-lock"></i>
+										<input type="password" id="register-password" required minlength="8" placeholder="At least 8 characters">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="register-role">System Role</label>
+									<div class="input-icon-wrapper">
+										<i class="fa-solid fa-id-card"></i>
+										<select id="register-role" required>
+											<option value="DEVELOPER">DEVELOPER</option>
+											<option value="ADMIN">ADMIN</option>
+											<option value="RELEASE_MANAGER">RELEASE_MANAGER</option>
+										</select>
+									</div>
+								</div>
+
+								<div id="register-error" class="form-error hidden"></div>
+								
+								<button type="submit" class="btn btn-primary btn-block">
+									Sign Up <i class="fa-solid fa-user-plus"></i>
+								</button>
+							</form>
+							
+							<p class="auth-switch">
+								Already have an account? <a href="#" id="to-login">Log in here</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- DASHBOARD VIEW -->
+			<section id="view-dashboard" class="view-panel hidden">
+				<div class="view-header">
+					<div>
+						<h1>System Dashboard</h1>
+						<p class="subtitle">Overview of your repositories, pipelines, and active executions.</p>
+					</div>
+					<div class="header-actions">
+						<button class="btn btn-primary" id="dash-trigger-shortcut">
+							<i class="fa-solid fa-play"></i> Trigger Pipeline
+						</button>
+					</div>
+				</div>
+
+				<!-- Stats Overview Grid -->
+				<div class="stats-grid">
+					<div class="stat-card glass-panel">
+						<div class="stat-icon icon-purple"><i class="fa-solid fa-code-fork"></i></div>
+						<div class="stat-content">
+							<span class="stat-label">Repositories</span>
+							<span class="stat-value" id="stat-repos-count">0</span>
+						</div>
+					</div>
+					<div class="stat-card glass-panel">
+						<div class="stat-icon icon-blue"><i class="fa-solid fa-diagram-project"></i></div>
+						<div class="stat-content">
+							<span class="stat-label">Pipelines</span>
+							<span class="stat-value" id="stat-pipelines-count">0</span>
+						</div>
+					</div>
+					<div class="stat-card glass-panel">
+						<div class="stat-icon icon-green"><i class="fa-solid fa-circle-check"></i></div>
+						<div class="stat-content">
+							<span class="stat-label">Successful Deploys</span>
+							<span class="stat-value" id="stat-success-count">0</span>
+						</div>
+					</div>
+					<div class="stat-card glass-panel">
+						<div class="stat-icon icon-red"><i class="fa-solid fa-circle-xmark"></i></div>
+						<div class="stat-content">
+							<span class="stat-label">Failed Deploys</span>
+							<span class="stat-value" id="stat-failed-count">0</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Dashboard Content Details -->
+				<div class="dashboard-details">
+					<!-- Active Executions List -->
+					<div class="details-main glass-panel">
+						<div class="panel-header">
+							<h3>Recent Deployments</h3>
+							<button class="btn-text" id="refresh-deployments-btn"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+						</div>
+						<div class="table-responsive">
+							<table class="data-table">
+								<thead>
+									<tr>
+										<th>Pipeline</th>
+										<th>Current Stage</th>
+										<th>Status</th>
+										<th>Started At</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody id="dashboard-deployments-list">
+									<tr>
+										<td colspan="5" class="table-empty">No deployments found. Trigger a pipeline to start.</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<!-- Quick Trigger Panel -->
+					<div class="details-sidebar glass-panel">
+						<h3>Quick Run</h3>
+						<p class="panel-desc">Quickly trigger any registered pipeline.</p>
+						
+						<form id="quick-trigger-form">
+							<div class="form-group">
+								<label for="quick-pipeline-select">Select Pipeline</label>
+								<select id="quick-pipeline-select" required>
+									<option value="" disabled selected>Choose a pipeline...</option>
+								</select>
+							</div>
+							<button type="submit" class="btn btn-primary btn-block">
+								Run Pipeline <i class="fa-solid fa-play"></i>
+							</button>
+						</form>
+
+						<hr class="panel-divider">
+
+						<h4>Actuator Status</h4>
+						<div class="health-status-indicator">
+							<span class="health-badge status-success" id="actuator-health-badge">
+								<i class="fa-solid fa-circle-check"></i> System Healthy
+							</span>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- REPOSITORIES VIEW -->
+			<section id="view-repositories" class="view-panel hidden">
+				<div class="view-header">
+					<div>
+						<h1>Code Repositories</h1>
+						<p class="subtitle">Connect and configure your GitHub repositories containing `pipelineforge.yml` configurations.</p>
+					</div>
+					<div class="header-actions">
+						<button class="btn btn-primary" id="open-register-repo-modal">
+							<i class="fa-solid fa-plus"></i> Register Repository
+						</button>
+					</div>
+				</div>
+
+				<div class="repos-layout">
+					<!-- Register Repo Form (Inline Card) -->
+					<div id="register-repo-card" class="glass-panel form-card hidden">
+						<div class="card-header">
+							<h3>Register New Repository</h3>
+							<button class="close-card-btn" id="close-register-repo-btn"><i class="fa-solid fa-xmark"></i></button>
+						</div>
+						
+						<form id="register-repo-form">
+							<div class="form-group">
+								<label for="repo-name">Friendly Repository Name</label>
+								<input type="text" id="repo-name" required placeholder="e.g. My Express App">
+							</div>
+
+							<div class="form-group">
+								<label for="repo-url">GitHub Repository URL</label>
+								<input type="url" id="repo-url" required placeholder="e.g. https://github.com/owner/repo.git">
+								<small class="form-help">Must be a valid GitHub HTTPS repository URL.</small>
+							</div>
+
+							<div class="form-group">
+								<label for="repo-branch">Default Branch</label>
+								<input type="text" id="repo-branch" required placeholder="main" value="main">
+							</div>
+
+							<div class="form-group">
+								<label for="repo-token">GitHub Personal Access Token (PAT)</label>
+								<input type="password" id="repo-token" required placeholder="github_pat_...">
+								<small class="form-help">Token will be securely encrypted in the database. Requires read access to repositories and contents.</small>
+							</div>
+
+							<div id="repo-error" class="form-error hidden"></div>
+							
+							<div class="form-actions">
+								<button type="button" class="btn btn-secondary" id="cancel-register-repo">Cancel</button>
+								<button type="submit" class="btn btn-primary">Register <i class="fa-solid fa-square-plus"></i></button>
+							</div>
+						</form>
+					</div>
+
+					<!-- Repositories Grid List -->
+					<div class="repos-grid" id="repositories-list-grid">
+						<!-- Dynamically populated -->
+					</div>
+				</div>
+			</section>
+
+			<!-- PIPELINES VIEW -->
+			<section id="view-pipelines" class="view-panel hidden">
+				<div class="view-header">
+					<div>
+						<h1>Build & Deploy Pipelines</h1>
+						<p class="subtitle">Create and manage your pipeline triggers. Configuration stages run dynamically from your repository's `pipelineforge.yml`.</p>
+					</div>
+					<div class="header-actions">
+						<button class="btn btn-primary" id="open-create-pipeline-modal">
+							<i class="fa-solid fa-plus"></i> Create Pipeline
+						</button>
+					</div>
+				</div>
+
+				<div class="pipelines-layout">
+					<!-- Create Pipeline Form Card -->
+					<div id="create-pipeline-card" class="glass-panel form-card hidden">
+						<div class="card-header">
+							<h3>Create New Pipeline</h3>
+							<button class="close-card-btn" id="close-create-pipeline-btn"><i class="fa-solid fa-xmark"></i></button>
+						</div>
+
+						<form id="create-pipeline-form">
+							<div class="form-group">
+								<label for="pipeline-name">Pipeline Name</label>
+								<input type="text" id="pipeline-name" required placeholder="e.g. Production Deployment">
+							</div>
+
+							<div class="form-group">
+								<label for="pipeline-repo-select">Linked Repository</label>
+								<select id="pipeline-repo-select" required>
+									<option value="" disabled selected>Choose a repository...</option>
+								</select>
+							</div>
+
+							<div class="form-group">
+								<label>Pipeline Execution Stages</label>
+								<p class="section-desc">Configure the execution order and structure of stages. Execution commands are read directly from `pipelineforge.yml` in your repo.</p>
+								
+								<div class="stages-config-list">
+									<!-- BUILD STAGE -->
+									<div class="stage-config-row">
+										<input type="checkbox" id="stage-enable-build" checked disabled>
+										<span class="stage-badge stage-build">BUILD</span>
+										<div class="stage-order-config">
+											<label for="stage-order-build">Order</label>
+											<input type="number" id="stage-order-build" value="1" min="1" max="10" required>
+										</div>
+									</div>
+
+									<!-- TEST STAGE -->
+									<div class="stage-config-row">
+										<input type="checkbox" id="stage-enable-test" checked>
+										<span class="stage-badge stage-test">TEST</span>
+										<div class="stage-order-config">
+											<label for="stage-order-test">Order</label>
+											<input type="number" id="stage-order-test" value="2" min="1" max="10" required>
+										</div>
+									</div>
+
+									<!-- DEPLOY STAGE -->
+									<div class="stage-config-row">
+										<input type="checkbox" id="stage-enable-deploy" checked>
+										<span class="stage-badge stage-deploy">DEPLOY</span>
+										<div class="stage-order-config">
+											<label for="stage-order-deploy">Order</label>
+											<input type="number" id="stage-order-deploy" value="3" min="1" max="10" required>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div id="pipeline-error" class="form-error hidden"></div>
+
+							<div class="form-actions">
+								<button type="button" class="btn btn-secondary" id="cancel-create-pipeline">Cancel</button>
+								<button type="submit" class="btn btn-primary">Create Pipeline <i class="fa-solid fa-square-plus"></i></button>
+							</div>
+						</form>
+					</div>
+
+					<!-- Pipelines Grid List -->
+					<div class="pipelines-grid" id="pipelines-list-grid">
+						<!-- Dynamically populated -->
+					</div>
+				</div>
+			</section>
+
+			<!-- LOGS & EXECUTIONS VIEW -->
+			<section id="view-logs" class="view-panel hidden">
+				<div class="view-header">
+					<div>
+						<h1>Deployment Executions</h1>
+						<p class="subtitle">Stream real-time shell outputs, command logs, and track deployment runs.</p>
+					</div>
+					<div class="header-actions">
+						<button class="btn btn-secondary" id="back-to-dashboard-btn">
+							<i class="fa-solid fa-chevron-left"></i> Back to Dashboard
+						</button>
+					</div>
+				</div>
+
+				<div class="execution-workspace">
+					<!-- Run Selection List (Left Column) -->
+					<div class="execution-sidebar glass-panel">
+						<h3>Execution History</h3>
+						<ul class="execution-runs-list" id="execution-runs-list-ul">
+							<li class="run-item-empty">No deployment runs recorded.</li>
+						</ul>
+					</div>
+
+					<!-- Active Console Terminal (Right Column) -->
+					<div class="execution-console">
+						<!-- Deployment State Header -->
+						<div class="console-header glass-panel">
+							<div class="console-info">
+								<span class="console-run-id" id="console-run-id">Select an execution run</span>
+								<h2 id="console-pipeline-name">No Pipeline Selected</h2>
+								<div class="console-metadata" id="console-metadata-panel">
+									<!-- Dynamically populated metadata -->
+								</div>
+							</div>
+							
+							<div class="console-actions">
+								<button class="btn btn-danger hidden" id="console-rollback-btn">
+									<i class="fa-solid fa-rotate-left"></i> Rollback
+								</button>
+							</div>
+						</div>
+
+						<!-- Stage Progress Bar -->
+						<div class="stage-progress-wrapper glass-panel hidden" id="console-stages-progress">
+							<!-- Dynamically populated stages with active indicators -->
+						</div>
+
+						<!-- Monospaced Terminal Output -->
+						<div class="terminal-wrapper glass-panel">
+							<div class="terminal-bar">
+								<div class="terminal-dots">
+									<span class="dot-red"></span>
+									<span class="dot-yellow"></span>
+									<span class="dot-green"></span>
+								</div>
+								<div class="terminal-title">bash - autobuild-worker</div>
+								<div class="terminal-controls">
+									<button id="terminal-autoscroll-toggle" class="terminal-btn active" title="Toggle Auto-scroll">
+										<i class="fa-solid fa-angles-down"></i> Scroll Lock
+									</button>
+								</div>
+							</div>
+							<div class="terminal-body" id="console-terminal-body">
+								<div class="terminal-line line-system">> Please select a deployment execution run from the left panel to load terminal logs...</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+		</main>
+	</div>
+
+	<script src="/app.js"></script>
+</body>
+</html>
