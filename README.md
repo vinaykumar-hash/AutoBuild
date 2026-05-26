@@ -153,5 +153,4 @@ Due to the use of Docker socket mounting and shared volumes, AutoBuild cannot be
    Deploy the App and Runner containers as a single Task Definition using EC2 launch types. Map shared directories using ECS Bind Mounts and mount the Docker socket from the host.
 3. **Kubernetes**:
    Run the App and Runner sidecar in the same Pod, sharing storage using a local `emptyDir` volume. Transition container communication to an internal API agent over `localhost` instead of using the Docker socket.
-#   A u t o B u i l d  
- 
+#
